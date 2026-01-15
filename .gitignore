@@ -1,0 +1,3 @@
+synapse/
+backend/.env
+backend/alembic/

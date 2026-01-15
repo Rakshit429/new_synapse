@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+pydantic
+pydantic-settings
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+httpx
+psycopg2-binary  # If using Postgres, otherwise omit for SQLite
+python-dotenv
+scikit-learn
+pandas
+email-validator
