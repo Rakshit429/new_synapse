@@ -11,6 +11,9 @@ env/
 venv/
 .venv/
 .env
+backend/check_table.py
+backend/dummy_data.py
+backend/generate_token.py
 
 # MacOS junk (if working with mac users)
 .DS_Store

@@ -3,9 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.router import api_router
 from app.core.database import Base, engine
+# from app.models.user import User
+# from app.models.event import Event
+# from app.models.registration import Registration
+# from app.models.auth_role import AuthRole
 
-# Create Tables (In production, use Alembic migrations instead of this)
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

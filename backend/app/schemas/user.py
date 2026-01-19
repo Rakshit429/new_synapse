@@ -25,3 +25,7 @@ class AuthRoleSchema(BaseModel):
     org_name: str
     role_name: str
     org_type: str
+
+class TeamMemberCreate(BaseModel):
+    email: EmailStr
+    role: str  # Must be "coordinator" or "executive"

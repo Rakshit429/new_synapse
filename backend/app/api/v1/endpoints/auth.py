@@ -5,16 +5,17 @@ from app.services.microsoft_auth import validate_microsoft_code
 from app.models.user import User
 from app.core.security import create_access_token
 from app.schemas.token import Token
+from app.schemas.auth import LoginRequest
 
 router = APIRouter()
 
 @router.post("/login/microsoft", response_model=Token)
 async def login_microsoft(
-    code: str = Body(..., embed=True),
+    login_data: LoginRequest,
     db: Session = Depends(deps.get_db)
 ):
     # 1. Validate Code with Azure
-    ms_user = await validate_microsoft_code(code)
+    ms_user = await validate_microsoft_code(login_data.code)
     email = ms_user["email"].lower()
     
     # 2. Check Domain

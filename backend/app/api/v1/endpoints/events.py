@@ -3,16 +3,19 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.api import deps
 from app.models.event import Event
+from app.models.user import User  # <--- THIS WAS MISSING
 from app.models.registration import Registration
 from app.schemas.event import EventOut, EventDetail
+from app.services.recommender import get_event_recommendations
 
 router = APIRouter()
 
 @router.get("/", response_model=List[EventOut])
 def get_events(
     db: Session = Depends(deps.get_db),
-    current_user = Depends(deps.get_current_user),
-    sort_by: str = Query("date", regex="^(date|popularity)$"),
+    current_user: User = Depends(deps.get_current_user),
+    # Fixed deprecation warning: changed 'regex' to 'pattern'
+    sort_by: str = Query("date", pattern="^(date|popularity)$"),
     org_type: Optional[str] = None,
     search: Optional[str] = None,
     skip: int = 0,
@@ -41,11 +44,21 @@ def get_events(
         
     return events
 
+@router.get("/recommendations", response_model=List[EventOut])
+def get_recommendations(
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    Get AI-driven event recommendations based on user interests and history.
+    """
+    return get_event_recommendations(db, current_user.id)
+
 @router.get("/{event_id}", response_model=EventDetail)
 def get_event_detail(
     event_id: int,
     db: Session = Depends(deps.get_db),
-    current_user = Depends(deps.get_current_user)
+    current_user: User = Depends(deps.get_current_user)
 ):
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
@@ -59,7 +72,7 @@ def register_for_event(
     event_id: int,
     custom_answers: dict = {},
     db: Session = Depends(deps.get_db),
-    current_user = Depends(deps.get_current_user)
+    current_user: User = Depends(deps.get_current_user)
 ):
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
