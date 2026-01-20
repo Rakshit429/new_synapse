@@ -1,0 +1,317 @@
+/* Deep Dark Background */
+body {
+  background-color: #1a1b2e; 
+  color: white;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  background-color: #111222;
+  height: 100vh;
+  padding: 20px;
+}
+
+/* The "Glass" Effect for Event Cards */
+.event-card {
+  background: rgba(255, 255, 255, 0.05); /* Semi-transparent */
+  backdrop-filter: blur(10px); /* The blur effect */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-10px);
+  border-color: #7c3aed; /* Purple glow on hover */
+}
+
+.btn-purple {
+  background-color: #7c3aed;
+  color: white;
+  border-radius: 10px;
+  border: none;
+}
+
+.btn-purple:hover {
+  background-color: #6d28d9;
+}
+
+/* The Sidebar Drawer */
+.filter-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px; /* Hidden by default */
+  width: 350px;
+  height: 100vh;
+  background: rgba(17, 18, 34, 0.95);
+  backdrop-filter: blur(20px);
+  z-index: 1050;
+  transition: right 0.4s cubic-bezier(0.05, 0.7, 0.1, 1);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-sidebar.open {
+  right: 0;
+}
+
+/* Background Dimming */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+/* Filter Chips (Cooler than dropdowns) */
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.filter-chip.active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+}
+
+/* Styling for the Board Name (Badge) */
+.board-badge {
+  background: rgba(124, 58, 237, 0.15); /* Soft purple background */
+  color: #a5a6f6; /* Bright pastel lavender */
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+/* Styling for the Club Name */
+.text-accent {
+  color: #7c3aed !important; /* Brand purple to make it pop */
+  letter-spacing: 0.5px;
+}
+
+/* Ensure the Event Name is bright white */
+.card-title {
+  color: #ffffff !important;
+  margin-top: 5px;
+}
+
+/* Ensure secondary info (date/location) is legible */
+.text-secondary {
+  color: #cbd5e1 !important; /* Light silver-blue */
+}
+
+.user-profile-circle {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #7c3aed, #9d66ff);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+
+.btn-purple {
+  background: #7c3aed;
+  border: none;
+  color: white;
+}
+
+/* Modal Overlay Animation */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+/* The Container */
+.login-glass-container {
+  width: 900px;
+  height: 550px;
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Split Design */
+.login-brand-side {
+  flex: 1;
+  background: linear-gradient(rgba(124, 58, 237, 0.4), rgba(26, 27, 46, 0.8)), 
+              url('https://link-to-your-iit-delhi-image.jpg');
+  background-size: cover;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-form-side {
+  flex: 1;
+  background: #111222;
+  padding: 50px;
+  display: flex;
+  align-items: center;
+}
+
+/* Form Styling */
+.input-group-custom {
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.input-group-custom label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #a5a6f6;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.input-group-custom input, .select-custom {
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+  padding: 8px 0;
+  outline: none;
+}
+
+.btn-login-submit {
+  width: 100%;
+  padding: 12px;
+  background: #7c3aed;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  margin-top: 20px;
+  transition: 0.3s;
+}
+
+.btn-login-submit:hover {
+  background: #6d28d9;
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Fix the X Button placement */
+.close-modal-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.close-modal-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+/* Container for the button */
+.microsoft-btn-container {
+  width: 100%;
+  margin-top: 2rem;
+}
+
+/* Refined Microsoft Button Appearance */
+.btn-microsoft-login {
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #ffffff; /* Stark white for high contrast */
+  color: #000000;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Ensure the logo stays consistent */
+.ms-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Professional Hover Effects */
+.btn-microsoft-login:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-2px);
+  /* Adding a purple glow to tie into the Synapse branding */
+  box-shadow: 0 8px 15px rgba(124, 58, 237, 0.4);
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+.btn-microsoft-login:active {
+  transform: translateY(0);
+}
+
+/* Update Auth Notice to be more subtle */
+.auth-notice {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin-top: 1rem;
+  line-height: 1.4;
+  max-width: 250px;
+  margin-left: auto;
+  margin-right: auto;
+}
