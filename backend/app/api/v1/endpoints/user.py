@@ -38,4 +38,3 @@ def get_my_calendar(
     # SQLAlchemy relationship magic
     return [reg.event for reg in current_user.registrations]
 
-# Note: We will add ICS export logic here later if needed

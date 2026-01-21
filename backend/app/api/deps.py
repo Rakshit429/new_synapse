@@ -8,7 +8,6 @@ from app.models.user import User
 from app.schemas.token import TokenPayload
 
 security_scheme = HTTPBearer()
-# 1. NEW: Define a scheme that doesn't error if token is missing
 security_scheme_optional = HTTPBearer(auto_error=False)
 
 def get_db() -> Generator:

@@ -104,4 +104,4 @@ const EventRegistrationModal = ({ isOpen, onClose, eventId, onSuccess }) => {
   );
 };
 
-export default EventRegistrationModal;
+export default EventRegistrationModal;  
