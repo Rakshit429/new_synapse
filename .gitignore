@@ -14,6 +14,13 @@ venv/
 backend/check_table.py
 backend/dummy_data.py
 backend/generate_token.py
+backend/seed_admin.py
+backend/static/uploads/
 
-# MacOS junk (if working with mac users)
 .DS_Store
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
