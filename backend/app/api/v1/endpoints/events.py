@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.api import deps
 from app.models.event import Event
-from app.models.user import User  # <--- THIS WAS MISSING
+from app.models.user import User
 from app.models.registration import Registration
 from app.schemas.event import EventOut, EventDetail
 from app.services.recommender import get_event_recommendations
@@ -13,8 +13,8 @@ router = APIRouter()
 @router.get("/", response_model=List[EventOut])
 def get_events(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
-    # Fixed deprecation warning: changed 'regex' to 'pattern'
+    # 1. CHANGED: Use get_current_user_optional and allow None
+    current_user: Optional[User] = Depends(deps.get_current_user_optional),
     sort_by: str = Query("date", pattern="^(date|popularity)$"),
     org_type: Optional[str] = None,
     search: Optional[str] = None,
@@ -32,17 +32,23 @@ def get_events(
     # Sort
     if sort_by == "date":
         query = query.order_by(Event.date.asc())
-    # Note: Popularity sort requires join with registration count (complex query skipped for brevity)
 
     events = query.offset(skip).limit(limit).all()
     
-    # Check registration status for current user (Optimized in production via JOINs)
-    user_reg_ids = {r.event_id for r in current_user.registrations}
-    
-    for e in events:
-        e.is_registered = e.id in user_reg_ids
+    # 2. CHANGED: Handle Anonymous User Logic
+    if current_user:
+        # If logged in, calculate real status
+        user_reg_ids = {r.event_id for r in current_user.registrations}
+        for e in events:
+            e.is_registered = e.id in user_reg_ids
+    else:
+        # If anonymous, everyone is "Not Registered"
+        for e in events:
+            e.is_registered = False
         
     return events
+
+# ... rest of the file stays the same ...
 
 @router.get("/recommendations", response_model=List[EventOut])
 def get_recommendations(

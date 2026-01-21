@@ -6,10 +6,13 @@ from app.models.event import Event
 from app.models.auth_role import AuthRole
 from app.schemas.event import EventCreate, EventOut
 from app.schemas.user import TeamMemberCreate, UserOut
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
+import shutil
+import os
+import json
+from app.core.config import settings
 
 router = APIRouter()
-
-# --- Dependencies ---
 
 def get_current_org_role(
     current_user: User = Depends(deps.get_current_user),
@@ -53,22 +56,65 @@ def get_org_dashboard(
 
 @router.post("/events", response_model=EventOut)
 def create_org_event(
-    event_in: EventCreate,
+    name: str = Form(...),
+    description: str = Form(...),
+    date: str = Form(...),  # Frontend sends string, we parse later or Pydantic handles
+    venue: str = Form(...),
+    tags: str = Form("[]"), # JSON string
+    custom_form_schema: str = Form("[]"), # JSON string
+    photo: UploadFile = File(None),
+    
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
     role: AuthRole = Depends(get_current_org_role)
 ):
-    # Security: Force org_name to match the user's permission
+    """Create a new event under the managed organization."""
+    
+    # 1. Handle File Upload
+    filename = None
+    if photo:
+        # Create uploads folder if not exists
+        os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
+        
+        # Unique Filename to prevent overwrites
+        import uuid
+        ext = photo.filename.split('.')[-1]
+        filename = f"{uuid.uuid4()}.{ext}"
+        file_path = os.path.join(settings.UPLOAD_FOLDER, filename)
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(photo.file, buffer)
+
+    # 2. Parse JSON fields from Form Data
+    try:
+        tags_list = json.loads(tags)
+        schema_list = json.loads(custom_form_schema)
+        # Parse date string to datetime if needed, or let SQLAlchemy handle if compatible
+        from datetime import datetime
+        # Frontend sends '2026-01-22T22:00', Python needs datetime obj
+        date_obj = datetime.fromisoformat(date)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid data format: {str(e)}")
+
+    # 3. Create Event Object
     event = Event(
-        **event_in.dict(),
+        name=name,
+        description=description,
+        date=date_obj,
+        venue=venue,
+        image_url=filename, # Store filename
+        tags=tags_list,
+        custom_form_schema=schema_list,
         org_name=role.org_name, 
         org_type=role.org_type,
         event_manager_email=current_user.email
     )
+    
     db.add(event)
     db.commit()
     db.refresh(event)
     return event
+
 
 # --- TEAM MANAGEMENT APIs (New) ---
 

@@ -6,7 +6,7 @@ from app.models.user import User
 from app.core.security import create_access_token
 from app.schemas.token import Token
 from app.schemas.auth import LoginRequest
-
+from app.schemas.user import UserOut  
 router = APIRouter()
 
 @router.post("/login/microsoft", response_model=Token)
@@ -28,9 +28,7 @@ async def login_microsoft(
     if not user:
         # Create new user
         # Extract entry number logic here if needed
-        entry_number = email.split("@")[0].upper() 
-        # You might need logic to convert 'cs124...' to entry no format
-        
+        entry_number = email.split("@")[0].upper()         
         user = User(
             email=email,
             name=ms_user["name"],
@@ -49,6 +47,10 @@ async def login_microsoft(
         "user": user
     }
 
-@router.get("/me")
+@router.get("/me", response_model=UserOut)
 def read_users_me(current_user: User = Depends(deps.get_current_user)):
+    """
+    Fetch the current user. 
+    The response_model=UserOut ensures 'authorizations' are included.
+    """
     return current_user
