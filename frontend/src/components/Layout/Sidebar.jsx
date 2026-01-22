@@ -13,7 +13,7 @@ const Sidebar = () => {
     <div className="sidebar d-flex flex-column justify-content-between p-3" style={{ backgroundColor: '#111222', minHeight: '100vh', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
       <div>
         <div className="d-flex align-items-center gap-2 mb-5 px-2">
-          <h4 className="fw-bold m-0" style={{ color: '#7c3aed' }}>SYNAPSE</h4>
+          <h4 className="fw-bold m-0" style={{ color: 'white' }}>SYNAPSE</h4>
         </div>
 
         <ul className="nav flex-column gap-2">

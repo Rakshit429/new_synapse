@@ -53,79 +53,85 @@ const StudentDashboard = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="container-fluid p-4">
-      <div className="row g-4">
-        {/* LEFT COLUMN: CALENDAR (Main Focus) */}
-        <div className="col-lg-8">
-          <div className="glass-card p-4 h-100">
-            <h4 className="text-white fw-bold mb-4 d-flex align-items-center gap-2">
-              <i className='bx bxs-calendar'></i> Your Calendar
-            </h4>
-            
-            <div className="calendar-wrapper bg-white rounded-3 p-3 text-dark">
-              <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                initialView="dayGridMonth"
-                headerToolbar={{
-                  left: 'prev,next today',
-                  center: 'title',
-                  right: 'dayGridMonth,listWeek'
-                }}
-                events={calendarEvents}
-                height="500px"
-              />
-            </div>
-          </div>
-        </div>
+  <div className="container-fluid student-dashboard">
+    <div className="row g-4">
 
-        {/* RIGHT COLUMN: WIDGETS */}
-        <div className="col-lg-4 d-flex flex-column gap-4">
-          
-          {/* Recommendations Widget */}
-          <div className="glass-card p-4">
-            <h5 className="text-white fw-bold mb-3 d-flex align-items-center gap-2">
-              <Star size={20} className="text-warning"/> Recommended For You
-            </h5>
-            {recommendations.length > 0 ? (
-              <div className="d-flex flex-column gap-3">
-                {recommendations.slice(0, 3).map(event => (
-                  <div key={event.id} className="p-3 rounded bg-dark border border-secondary">
-                    <h6 className="text-white mb-1">{event.name}</h6>
-                    <small className="text-secondary">{new Date(event.date).toLocaleDateString()}</small>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-secondary small">
-                No recommendations available. Explore and register for events to get personalized suggestions!
-              </p>
-            )}
-          </div>
+      {/* LEFT: CALENDAR */}
+      <div className="col-lg-8">
+        <div className="dashboard-glass-card p-4 h-100">
+          <h4 className="section-heading mb-4">
+            Your Calendar
+          </h4>
 
-          {/* Feedback Widget */}
-          <div className="glass-card p-4">
-            <h5 className="text-white fw-bold mb-3 d-flex align-items-center gap-2">
-              <MessageSquare size={20} className="text-info"/> Feedback Needed
-            </h5>
-            {feedbackNeeded.length > 0 ? (
-              <ul className="list-group list-group-flush bg-transparent">
-                {feedbackNeeded.map(event => (
-                  <li key={event.id} className="list-group-item bg-transparent text-white border-secondary px-0">
-                    {event.name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-secondary small">
-                You're all caught up! No events are awaiting your feedback.
-              </p>
-            )}
+          <div className="calendar-shell">
+            <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,listWeek'
+              }}
+              events={calendarEvents}
+              height="520px"
+            />
           </div>
-
         </div>
       </div>
+
+      {/* RIGHT: SIDE WIDGETS */}
+      <div className="col-lg-4 d-flex flex-column gap-4">
+
+        {/* RECOMMENDATIONS */}
+        <div className="dashboard-glass-card p-4">
+          <h5 className="section-heading-sm mb-3">
+            <Star size={18} className="text-warning" /> Recommended For You
+          </h5>
+
+          {recommendations.length > 0 ? (
+            <div className="recommendation-list">
+              {recommendations.slice(0, 3).map(event => (
+                <div key={event.id} className="recommendation-item">
+                  <h6 className="mb-1">{event.name}</h6>
+                  <span className="text-secondary small">
+                    {new Date(event.date).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-widget">
+              No recommendations yet.
+            </div>
+          )}
+        </div>
+
+        {/* FEEDBACK */}
+        <div className="dashboard-glass-card p-4">
+          <h5 className="section-heading-sm mb-3">
+            <MessageSquare size={18} className="text-info" /> Feedback Needed
+          </h5>
+
+          {feedbackNeeded.length > 0 ? (
+            <div className="feedback-list">
+              {feedbackNeeded.map(event => (
+                <div key={event.id} className="feedback-item">
+                  {event.name}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-widget">
+              You’re all caught up 
+            </div>
+          )}
+        </div>
+
+      </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default StudentDashboard;

@@ -1,71 +1,55 @@
-import React, { useState } from 'react';
-import { Calendar, MapPin, Users } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import EventRegistrationModal from '../Forms/EventRegistrationModal';
-import LoginModal from './LoginModal';
+import React from 'react';
+import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 
-const EventCard = ({ event, refreshEvents }) => {
-  const { user } = useAuth();
-  const [showRegModal, setShowRegModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
-  const handleRegisterClick = () => {
-    if (!user) {
-      setShowLoginModal(true);
-    } else {
-      setShowRegModal(true);
-    }
-  };
-
-  // Parsing date for display
-  const eventDate = new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  const eventTime = new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
+const EventCard = ({ event }) => {
   return (
     <div className="col-md-4 mb-4">
-      <div className="card h-100 border-0 shadow-sm" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
-        <img 
-          src={event.image_url ? `http://localhost:8000/uploads/${event.image_url}` : "https://via.placeholder.com/300x150"} 
-          className="card-img-top" 
-          alt={event.name} 
-          style={{ height: '180px', objectFit: 'cover' }}
+      <div className="card event-card h-100 p-3">
+
+        {/* Event Banner */}
+        <img
+          src={
+            event.image_url
+              ? `http://localhost:8000/uploads/${event.image_url}`
+              : "https://via.placeholder.com/300x150"
+          }
+          className="card-img-top rounded-4 mb-3"
+          alt="event"
         />
-        <div className="card-body p-4 d-flex flex-column">
-          <div className="d-flex justify-content-between align-items-start mb-2">
-            <span className="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">{event.org_name}</span>
-            {event.tags && event.tags.length > 0 && <span className="badge bg-dark text-secondary">{event.tags[0]}</span>}
-          </div>
-          
-          <h5 className="card-title text-white fw-bold mb-3">{event.name}</h5>
-          
-          <div className="text-secondary small mb-3 flex-grow-1">
-            <div className="d-flex align-items-center gap-2 mb-1"><Calendar size={14}/> {eventDate} at {eventTime}</div>
-            <div className="d-flex align-items-center gap-2 mb-1"><MapPin size={14}/> {event.venue}</div>
+
+        <div className="card-body p-0">
+
+          {/* ✅ BOARD BADGE (FIXED) */}
+          {event.board && (
+            <span className="board-badge mb-2 d-inline-block">
+              {event.board}
+            </span>
+          )}
+
+          <h5 className="card-title fw-bold text-white">
+            {event.name}
+          </h5>
+
+          {/* Club / Org name */}
+          <p className="text-accent small mb-3">
+            <strong>{event.org_name}</strong>
+          </p>
+
+          <div className="d-flex align-items-center mb-2 text-secondary small">
+            <Calendar size={14} className="me-2" />
+            {new Date(event.date).toLocaleDateString()}
           </div>
 
-          {event.is_registered ? (
-            <button className="btn btn-success w-100 disabled" style={{ opacity: 0.8 }}>
-              Registered
-            </button>
-          ) : (
-            <button className="btn btn-purple w-100" onClick={handleRegisterClick}>
-              Register Now
-            </button>
-          )}
+          <div className="d-flex align-items-center mb-4 text-secondary small">
+            <MapPin size={14} className="me-2" />
+            {event.venue}
+          </div>
+
+          <button className="btn btn-purple w-100 d-flex align-items-center justify-content-center gap-2">
+            Register <ExternalLink size={16} />
+          </button>
         </div>
       </div>
-
-      <EventRegistrationModal 
-        isOpen={showRegModal} 
-        onClose={() => setShowRegModal(false)}
-        eventId={event.id}
-        onSuccess={refreshEvents}
-      />
-      
-      <LoginModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)} 
-      />
     </div>
   );
 };
