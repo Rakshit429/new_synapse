@@ -6,6 +6,7 @@ import Loader from "../components/UI/Loader";
 import LoginModal from "../components/UI/LoginModal";
 import { Filter } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const Home = () => {
   const { user } = useAuth();
@@ -36,25 +37,33 @@ const Home = () => {
       const res = await api.get("/events", { params });
       setEvents(res.data);
     } catch (err) {
-      console.error("API error:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const clearAllFilters = () => {
-    setOrgType("");
-    setSelectedBoard("");
-    setSelectedItem("");
-  };
-
-  // 🔑 This is what Register will call
-  const handleRegisterClick = () => {
+  const handleRegisterClick = async (event) => {
     if (!user) {
       setIsLoginOpen(true);
-    } else {
-      // later: register API call
-      console.log("User is logged in → proceed to register");
+      return;
+    }
+
+    try {
+      await api.post(`/events/${event.id}/register`, {
+        custom_answers: {}
+      });
+
+      toast.success("Registered successfully");
+
+      // Refresh events to update is_registered
+      fetchEvents();
+    } catch (err) {
+      if (err.response?.status === 400) {
+        toast.error("Already registered");
+      } else {
+        toast.error("Registration failed");
+      }
     }
   };
 
@@ -88,7 +97,7 @@ const Home = () => {
       ) : (
         <div className="row g-4">
           {events.length > 0 ? (
-            events.map((event) => (
+            events.map(event => (
               <EventCard
                 key={event.id}
                 event={event}
@@ -98,18 +107,11 @@ const Home = () => {
           ) : (
             <div className="col-12 text-center py-5">
               <h4 className="text-secondary">No events found</h4>
-              <button
-                className="btn btn-link text-purple fw-bold"
-                onClick={clearAllFilters}
-              >
-                Clear all filters
-              </button>
             </div>
           )}
         </div>
       )}
 
-      {/* FILTER DRAWER */}
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
@@ -121,7 +123,6 @@ const Home = () => {
         setSelectedItem={setSelectedItem}
       />
 
-      {/* LOGIN MODAL */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}

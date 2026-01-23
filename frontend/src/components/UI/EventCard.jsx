@@ -2,11 +2,12 @@ import React from 'react';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 
 const EventCard = ({ event, onRegisterClick }) => {
+  const isRegistered = event.is_registered;
+
   return (
     <div className="col-md-4 mb-4">
       <div className="card event-card h-100 p-3">
 
-        {/* Event Banner */}
         <img
           src={
             event.image_url
@@ -18,19 +19,10 @@ const EventCard = ({ event, onRegisterClick }) => {
         />
 
         <div className="card-body p-0">
-
-          {/* ✅ BOARD BADGE (FIXED) */}
-          {event.board && (
-            <span className="board-badge mb-2 d-inline-block">
-              {event.board}
-            </span>
-          )}
-
           <h5 className="card-title fw-bold text-white">
             {event.name}
           </h5>
 
-          {/* Club / Org name */}
           <p className="text-accent small mb-3">
             <strong>{event.org_name}</strong>
           </p>
@@ -46,11 +38,16 @@ const EventCard = ({ event, onRegisterClick }) => {
           </div>
 
           <button
-    className="btn btn-purple w-100 d-flex align-items-center justify-content-center gap-2"
-    onClick={onRegisterClick}
-  >
-    Register <ExternalLink size={16} />
-  </button>
+  className={`btn w-100 d-flex align-items-center justify-content-center gap-2 ${
+    isRegistered ? "btn-registered" : "btn-purple"
+  }`}
+  disabled={isRegistered}
+  onClick={() => onRegisterClick(event)}
+>
+  {isRegistered ? "Registered" : "Register"}
+  {!isRegistered && <ExternalLink size={16} />}
+</button>
+
         </div>
       </div>
     </div>
