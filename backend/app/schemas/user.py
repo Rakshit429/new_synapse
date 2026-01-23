@@ -25,12 +25,16 @@ class UserBase(BaseModel):
     department: Optional[str] = None
     hostel: Optional[str] = None
     interests: List[str] = []
+    current_year: Optional[int] = None
+
 
 class UserUpdate(BaseModel):
     interests: Optional[List[str]] = None
     photo_url: Optional[str] = None
     department: Optional[str] = None
     hostel: Optional[str] = None
+    current_year: Optional[int] = None
+
 
 class UserOut(UserBase):
     id: int

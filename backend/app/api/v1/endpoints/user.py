@@ -15,19 +15,13 @@ def update_profile(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user)
 ):
-    """Update user interests, photo, or department."""
-    if user_in.interests is not None:
-        current_user.interests = user_in.interests
-    if user_in.photo_url is not None:
-        current_user.photo_url = user_in.photo_url
-    if user_in.department is not None:
-        current_user.department = user_in.department
-    if user_in.hostel is not None:
-        current_user.hostel = user_in.hostel
-        
+    for field, value in user_in.dict(exclude_unset=True).items():
+        setattr(current_user, field, value)
+
     db.commit()
     db.refresh(current_user)
     return current_user
+
 
 @router.get("/calendar", response_model=list[EventOut])
 def get_my_calendar(
