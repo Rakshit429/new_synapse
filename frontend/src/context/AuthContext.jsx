@@ -7,6 +7,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 NEW: login modal state
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const openLoginModal = () => setShowLoginModal(true);
+  const closeLoginModal = () => setShowLoginModal(false);
+
   const fetchUser = async () => {
     try {
       const response = await api.get('/auth/me');
@@ -32,6 +38,7 @@ export const AuthProvider = ({ children }) => {
   const login = (token) => {
     localStorage.setItem('access_token', token);
     fetchUser();
+    closeLoginModal(); // ✅ close modal after successful login
   };
 
   const logout = () => {
@@ -41,7 +48,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        loading,
+        showLoginModal,
+        openLoginModal,
+        closeLoginModal
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
