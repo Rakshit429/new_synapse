@@ -3,6 +3,7 @@ import api from "../api/axios";
 import EventCard from "../components/UI/EventCard";
 import FilterDrawer from "../components/UI/FilterDrawer";
 import Loader from "../components/UI/Loader";
+import LoginModal from "../components/UI/LoginModal";
 import { Filter } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,7 +12,9 @@ const Home = () => {
 
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const [orgType, setOrgType] = useState("");
   const [selectedBoard, setSelectedBoard] = useState("");
@@ -22,29 +25,37 @@ const Home = () => {
   }, [orgType, selectedBoard, selectedItem]);
 
   const fetchEvents = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const params = {};
+      const params = {};
+      if (orgType) params.org_type = orgType;
+      if (selectedBoard) params.board = selectedBoard;
+      if (selectedItem) params.item = selectedItem;
 
-    if (orgType) params.org_type = orgType;
-    if (selectedBoard) params.board = selectedBoard;
-    if (selectedItem) params.item = selectedItem;
-
-    const res = await api.get("/events", { params });
-    setEvents(res.data);
-  } catch (err) {
-    console.error("API error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
+      const res = await api.get("/events", { params });
+      setEvents(res.data);
+    } catch (err) {
+      console.error("API error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const clearAllFilters = () => {
     setOrgType("");
     setSelectedBoard("");
     setSelectedItem("");
+  };
+
+  // 🔑 This is what Register will call
+  const handleRegisterClick = () => {
+    if (!user) {
+      setIsLoginOpen(true);
+    } else {
+      // later: register API call
+      console.log("User is logged in → proceed to register");
+    }
   };
 
   return (
@@ -77,10 +88,11 @@ const Home = () => {
       ) : (
         <div className="row g-4">
           {events.length > 0 ? (
-            events.map(event => (
+            events.map((event) => (
               <EventCard
                 key={event.id}
                 event={event}
+                onRegisterClick={handleRegisterClick}
               />
             ))
           ) : (
@@ -108,8 +120,15 @@ const Home = () => {
         selectedItem={selectedItem}
         setSelectedItem={setSelectedItem}
       />
+
+      {/* LOGIN MODAL */}
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+      />
     </>
   );
 };
 
 export default Home;
+

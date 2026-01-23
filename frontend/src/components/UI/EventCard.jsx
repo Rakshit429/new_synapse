@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 
-const EventCard = ({ event }) => {
+const EventCard = ({ event, onRegisterClick }) => {
   return (
     <div className="col-md-4 mb-4">
       <div className="card event-card h-100 p-3">
@@ -45,9 +45,12 @@ const EventCard = ({ event }) => {
             {event.venue}
           </div>
 
-          <button className="btn btn-purple w-100 d-flex align-items-center justify-content-center gap-2">
-            Register <ExternalLink size={16} />
-          </button>
+          <button
+    className="btn btn-purple w-100 d-flex align-items-center justify-content-center gap-2"
+    onClick={onRegisterClick}
+  >
+    Register <ExternalLink size={16} />
+  </button>
         </div>
       </div>
     </div>
