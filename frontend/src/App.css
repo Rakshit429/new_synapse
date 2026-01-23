@@ -752,3 +752,141 @@ body {
 .sort-glass svg {
   color: #a5a6f6;
 }
+
+/* ===== EVENT DETAIL PAGE ===== */
+
+.event-detail-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-top: 20px;
+}
+
+.event-detail-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 32px;
+}
+
+.event-detail-image {
+  width: 100%;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  object-fit: cover;
+}
+
+.event-detail-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.event-detail-org {
+  color: #7c3aed;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.event-detail-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  margin-bottom: 24px;
+}
+
+.event-detail-description {
+  color: #e5e7eb;
+  line-height: 1.7;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+}
+
+/* Utility */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.event-detail-container {
+  max-width: 900px;
+}
+
+.event-detail-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced Event Detail Layout */
+.event-detail-page {
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease;
+}
+
+.event-detail-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.event-detail-image {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.event-detail-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.event-detail-org {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-top: 8px;
+}
+
+/* Metadata Icon Containers */
+.icon-box-purple {
+  width: 44px;
+  height: 44px;
+  background: rgba(124, 58, 237, 0.15);
+  color: #7c3aed;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.event-detail-description {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 24px;
+  border-radius: 16px;
+  border-left: 3px solid #7c3aed;
+  color: #d1d5db;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.btn-outline-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: white;
+}

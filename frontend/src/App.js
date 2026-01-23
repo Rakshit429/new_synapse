@@ -16,6 +16,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import OrgDashboard from './pages/OrgDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AuthCallback from './pages/AuthCallback';
+import EventDetail from './pages/EventDetail';
 
 // UI
 import Loader from './components/UI/Loader';
@@ -41,7 +42,7 @@ const AppLayout = () => {
     <div className="container-fluid">
       <div className="row">
         {/* Sidebar */}
-        <nav className="col-md-2 d-none d-md-block sidebar">
+        <nav className="col-md-2 d-none d-md-block">
           <Sidebar />
         </nav>
 
@@ -50,12 +51,48 @@ const AppLayout = () => {
           <Navbar />
 
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Home />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
-            <Route path="/org/dashboard" element={<ProtectedRoute><OrgDashboard /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+
+            {/* ✅ PUBLIC EVENT DETAIL PAGE */}
+            <Route path="/events/:eventId" element={<EventDetail />} />
+
+            {/* Protected routes */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <StudentDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/org/dashboard"
+              element={
+                <ProtectedRoute>
+                  <OrgDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

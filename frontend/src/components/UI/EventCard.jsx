@@ -1,13 +1,21 @@
 import React from 'react';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const EventCard = ({ event, onRegisterClick }) => {
+  const navigate = useNavigate();
   const isRegistered = event.is_registered;
+
+  const goToDetail = () => {
+    navigate(`/events/${event.id}`);
+  };
 
   return (
     <div className="col-md-4 mb-4">
-      <div className="card event-card h-100 p-3">
-
+      <div
+        className="card event-card h-100 p-3 cursor-pointer"
+        onClick={goToDetail}
+      >
         <img
           src={
             event.image_url
@@ -37,17 +45,20 @@ const EventCard = ({ event, onRegisterClick }) => {
             {event.venue}
           </div>
 
+          {/* IMPORTANT: stopPropagation prevents navigation */}
           <button
-  className={`btn w-100 d-flex align-items-center justify-content-center gap-2 ${
-    isRegistered ? "btn-registered" : "btn-purple"
-  }`}
-  disabled={isRegistered}
-  onClick={() => onRegisterClick(event)}
->
-  {isRegistered ? "Registered" : "Register"}
-  {!isRegistered && <ExternalLink size={16} />}
-</button>
-
+            className={`btn w-100 d-flex align-items-center justify-content-center gap-2 ${
+              isRegistered ? "btn-registered" : "btn-purple"
+            }`}
+            disabled={isRegistered}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRegisterClick(event);
+            }}
+          >
+            {isRegistered ? "Registered" : "Register"}
+            {!isRegistered && <ExternalLink size={16} />}
+          </button>
         </div>
       </div>
     </div>
