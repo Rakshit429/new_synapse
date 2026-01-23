@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +10,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
 
 # -----------------------
 # CORS
@@ -25,11 +27,13 @@ if settings.BACKEND_CORS_ORIGINS:
 # -----------------------
 # 🔥 STATIC FILES (THIS WAS MISSING)
 # -----------------------
-# Your images are stored in: backend/static/uploads
+UPLOAD_DIR = "static/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 app.mount(
     "/uploads",
-    StaticFiles(directory="static/uploads"),
-    name="uploads"
+    StaticFiles(directory=UPLOAD_DIR),
+    name="uploads",
 )
 
 # -----------------------
