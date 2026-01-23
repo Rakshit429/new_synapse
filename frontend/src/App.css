@@ -661,3 +661,46 @@ body {
   color: #ede9fe !important;
   opacity: 1 !important;
 }
+
+/* ===== SEARCH BAR (HOME HEADER) ===== */
+
+.search-glass {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  height: 42px;
+  padding: 0 14px;
+
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-glass:hover,
+.search-glass:focus-within {
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+}
+
+.search-glass input {
+  background: transparent;
+  border: none;
+  outline: none;
+
+  color: white;
+  font-size: 0.9rem;
+  width: 180px;
+}
+
+.search-glass input::placeholder {
+  color: #94a3b8;
+}
+
+.search-icon {
+  color: #a5a6f6;
+}

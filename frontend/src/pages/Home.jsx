@@ -4,7 +4,7 @@ import EventCard from "../components/UI/EventCard";
 import FilterDrawer from "../components/UI/FilterDrawer";
 import Loader from "../components/UI/Loader";
 import LoginModal from "../components/UI/LoginModal";
-import { Filter } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -21,9 +21,22 @@ const Home = () => {
   const [selectedBoard, setSelectedBoard] = useState("");
   const [selectedItem, setSelectedItem] = useState("");
 
+  // 🔍 SEARCH STATE
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // 🔁 Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   useEffect(() => {
     fetchEvents();
-  }, [orgType, selectedBoard, selectedItem]);
+  }, [orgType, selectedBoard, selectedItem, debouncedSearch]);
 
   const fetchEvents = async () => {
     try {
@@ -33,6 +46,7 @@ const Home = () => {
       if (orgType) params.org_type = orgType;
       if (selectedBoard) params.board = selectedBoard;
       if (selectedItem) params.item = selectedItem;
+      if (debouncedSearch) params.search = debouncedSearch;
 
       const res = await api.get("/events", { params });
       setEvents(res.data);
@@ -55,9 +69,7 @@ const Home = () => {
       });
 
       toast.success("Registered successfully");
-
-      // Refresh events to update is_registered
-      fetchEvents();
+      fetchEvents(); // refresh is_registered
     } catch (err) {
       if (err.response?.status === 400) {
         toast.error("Already registered");
@@ -78,15 +90,28 @@ const Home = () => {
           </p>
         </div>
 
-        <button
-          className={`btn d-flex align-items-center gap-2 ${
-            orgType ? "btn-purple" : "btn-outline-secondary text-white"
-          }`}
-          onClick={() => setIsFilterOpen(true)}
-        >
-          <Filter size={18} />
-          Filter
-        </button>
+        {/* 🔍 SEARCH + FILTER */}
+        <div className="d-flex align-items-center gap-3">
+          <div className="search-glass">
+            <Search size={16} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <button
+            className={`btn d-flex align-items-center gap-2 ${
+              orgType ? "btn-purple" : "btn-outline-secondary text-white"
+            }`}
+            onClick={() => setIsFilterOpen(true)}
+          >
+            <Filter size={18} />
+            Filter
+          </button>
+        </div>
       </div>
 
       {/* CONTENT */}
@@ -97,7 +122,7 @@ const Home = () => {
       ) : (
         <div className="row g-4">
           {events.length > 0 ? (
-            events.map(event => (
+            events.map((event) => (
               <EventCard
                 key={event.id}
                 event={event}
@@ -112,6 +137,7 @@ const Home = () => {
         </div>
       )}
 
+      {/* FILTER DRAWER */}
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
@@ -123,6 +149,7 @@ const Home = () => {
         setSelectedItem={setSelectedItem}
       />
 
+      {/* LOGIN MODAL */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
@@ -132,4 +159,3 @@ const Home = () => {
 };
 
 export default Home;
-
