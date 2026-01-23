@@ -9,7 +9,11 @@ class Settings(BaseSettings):
     UPLOAD_FOLDER: str = "static/uploads"
 
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    BACKEND_CORS_ORIGINS = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://synapse-nu-peach.vercel.app"
+    ]
 
     # Database
     DATABASE_URL: str
