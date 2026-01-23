@@ -704,3 +704,51 @@ body {
 .search-icon {
   color: #a5a6f6;
 }
+
+/* ===== SORT DROPDOWN (HOME HEADER) ===== */
+
+.sort-glass {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  height: 42px;
+  padding: 0 14px;
+
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sort-glass:hover,
+.sort-glass:focus-within {
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+}
+
+.sort-glass select {
+  background: transparent;
+  border: none;
+  outline: none;
+
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.sort-glass select option {
+  background: #111222;
+  color: white;
+}
+
+.sort-glass svg {
+  color: #a5a6f6;
+}
