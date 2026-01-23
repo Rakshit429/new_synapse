@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }) => {
         user,
         login,
         logout,
+        setUser, 
         loading,
         showLoginModal,
         openLoginModal,
