@@ -44,7 +44,7 @@ const Sidebar = () => {
             <div className="mt-4 pt-4 border-top border-secondary">
               <small className="text-muted text-uppercase fw-bold px-3">Management</small>
               
-              {/* 1. ADMIN LINK (Based on is_superuser boolean) */}
+              {/* 1. ADMIN LINK */}
               {user?.is_superuser && (
                 <NavLink 
                   to="/admin" 
@@ -54,12 +54,11 @@ const Sidebar = () => {
                 </NavLink>
               )}
 
-              {/* 2. ORG LINKS (Based on authorizations list) */}
-              {console.log(user)}
+              {/* 2. ORG LINKS (Updated to include ID) */}
               {user?.authorizations?.map((auth, idx) => (
                 <NavLink 
                   key={idx}
-                  to="/org/dashboard" 
+                  to={`/org/${auth.id}/dashboard`} 
                   className="nav-link d-flex align-items-center gap-3 text-warning mt-2"
                 >
                   <Layout size={20} /> {auth.org_name}

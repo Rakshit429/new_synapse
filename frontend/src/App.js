@@ -20,7 +20,7 @@ import EventDetail from './pages/EventDetail';
 
 // UI
 import Loader from './components/UI/Loader';
-import LoginModal from './components/UI/LoginModal'; // 🔥 IMPORTANT
+import LoginModal from './components/UI/LoginModal'; 
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AppLayout = () => {
-  const { showLoginModal, closeLoginModal } = useAuth(); // 🔥 NEW
+  const { showLoginModal, closeLoginModal } = useAuth(); 
 
   return (
     <div className="container-fluid vh-100 overflow-hidden p-0">
@@ -83,10 +83,13 @@ const AppLayout = () => {
                 path="/dashboard"
                 element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>}
               />
+              
+              {/* ✅ CHANGED: Now accepts orgId parameter */}
               <Route
-                path="/org/dashboard"
+                path="/org/:orgId/dashboard"
                 element={<ProtectedRoute><OrgDashboard /></ProtectedRoute>}
               />
+              
               <Route
                 path="/admin"
                 element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}
@@ -99,7 +102,6 @@ const AppLayout = () => {
         </main>
       </div>
 
-      {/* 🔥 GLOBAL LOGIN MODAL */}
       <LoginModal
         isOpen={showLoginModal}
         onClose={closeLoginModal}
