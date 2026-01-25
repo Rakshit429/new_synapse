@@ -1,21 +1,24 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
+from app.models.enums import RoleName, OrgType, OrgName
 
 # --- Auth Role Schemas ---
 class AuthRoleOut(BaseModel):
     id: int
-    org_name: str
-    role_name: str
-    org_type: str
-    
+    org_name: OrgName
+    role_name: RoleName
+    org_type: OrgType
+
     class Config:
         from_attributes = True
 
+
 class AuthRoleSchema(BaseModel):
-    org_name: str
-    role_name: str
-    org_type: str
+    org_name: OrgName
+    role_name: RoleName
+    org_type: OrgType
+
 
 # --- User Schemas ---
 class UserBase(BaseModel):
@@ -27,7 +30,6 @@ class UserBase(BaseModel):
     interests: List[str] = []
     current_year: Optional[int] = None
 
-
 class UserUpdate(BaseModel):
     interests: Optional[List[str]] = None
     photo_url: Optional[str] = None
@@ -35,21 +37,19 @@ class UserUpdate(BaseModel):
     hostel: Optional[str] = None
     current_year: Optional[int] = None
 
-
 class UserOut(UserBase):
     id: int
     photo_url: Optional[str] = None
     is_active: bool
     is_superuser: bool
-    created_at: datetime | None = None
+    created_at: Optional[datetime] = None
     
-    # Crucial for Sidebar visibility
     authorizations: List[AuthRoleOut] = [] 
 
     class Config:
         from_attributes = True
 
-# --- Team Management Schema (The one that was missing) ---
+# --- Team Management Schema ---
 class TeamMemberCreate(BaseModel):
     email: EmailStr
-    role: str  # Must be "coordinator" or "executive"
+    role: RoleName

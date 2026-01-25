@@ -7,22 +7,27 @@ from app.models.user import User
 from app.models.registration import Registration
 from app.schemas.event import EventOut, EventDetail
 from app.services.recommender import get_event_recommendations
-from typing import Optional
+from app.models.enums import OrgType # Import the Enum
 
 router = APIRouter()
-
 
 def normalize_org_type(org_type: str) -> str:
     """
     Frontend sends: Clubs / Fests / Departments
-    DB stores:      Club / Fest / Department
+    DB stores:      club / fest / department (Lowercase)
     """
+    if not org_type:
+        return None
+        
     mapping = {
-        "Clubs": "Club",
-        "Fests": "Fest",
-        "Departments": "Department"
+        "Clubs": "club",
+        "Fests": "fest",
+        "Departments": "department",
+        "Boards": "board",
+        "Societies": "society"
     }
-    return mapping.get(org_type, org_type)
+    # Return mapped value or fallback to lowercase
+    return mapping.get(org_type, org_type.lower())
 
 
 @router.get("/", response_model=List[EventOut])
@@ -32,9 +37,9 @@ def get_events(
 
     sort_by: str = Query("date", pattern="^(date|popularity)$"),
 
-    # FILTER PARAMS (FROM FRONTEND)
+    # FILTER PARAMS
     org_type: Optional[str] = None,
-    board: Optional[str] = None,   # UI-only, ignored safely
+    board: Optional[str] = None,   
     item: Optional[str] = None,
     search: Optional[str] = None,
 
@@ -43,15 +48,14 @@ def get_events(
 ):
     query = db.query(Event)
 
-    # 1️⃣ ORG TYPE FILTER
+    # 1️⃣ ORG TYPE FILTER (Using the new robust normalizer)
     if org_type:
-        query = query.filter(
-            Event.org_type == normalize_org_type(org_type)
-        )
+        clean_type = normalize_org_type(org_type)
+        query = query.filter(Event.org_type == clean_type)
 
-    # 2️⃣ FINAL ITEM FILTER → org_name
+    # 2️⃣ FINAL ITEM FILTER → org_name (e.g. "DevClub" -> "devclub")
     if item:
-        query = query.filter(Event.org_name == item)
+        query = query.filter(Event.org_name == item.lower())
 
     # 3️⃣ SEARCH
     if search:
@@ -73,11 +77,6 @@ def get_events(
             e.is_registered = False
 
     return events
-
-
-# ----------------------------
-# UNCHANGED ROUTES
-# ----------------------------
 
 @router.get("/recommendations", response_model=List[EventOut])
 def get_recommendations(

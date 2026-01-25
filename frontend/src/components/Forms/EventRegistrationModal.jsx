@@ -20,6 +20,7 @@ const EventRegistrationModal = ({ isOpen, onClose, eventId, onSuccess }) => {
       setLoading(true);
       const res = await api.get(`/events/${eventId}`);
       // The backend returns custom_form_schema in the event detail
+      console.log("Fetched Event Schema:", res.data.custom_form_schema);
       setSchema(res.data.custom_form_schema || []);
     } catch (err) {
       console.error(err);

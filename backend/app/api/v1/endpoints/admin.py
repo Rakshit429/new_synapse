@@ -25,24 +25,30 @@ def authorize_club_head(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Check duplication
+    # ✅ FIX 1: Extract the string values explicitly
+    org_name_str = role_data.org_name.value  # "devclub"
+    role_name_str = role_data.role_name.value
+    org_type_str = role_data.org_type.value
+
+    # ✅ FIX 2: Use the string variable in the query
     existing = db.query(AuthRole).filter(
         AuthRole.user_id == user.id, 
-        AuthRole.org_name == role_data.org_name
+        AuthRole.org_name == org_name_str 
     ).first()
     
     if existing:
         return {"msg": "User already has this role"}
 
+    # ✅ FIX 3: Use the string variable in the insert
     new_role = AuthRole(
         user_id=user.id,
-        org_name=role_data.org_name,
-        role_name=role_data.role_name,
-        org_type=role_data.org_type
+        org_name=org_name_str,
+        role_name=role_name_str,
+        org_type=org_type_str
     )
     db.add(new_role)
     db.commit()
-    return {"msg": f"Authorized {user.name} for {role_data.org_name}"}
+    return {"msg": f"Authorized {user.name} for {org_name_str}"}
 
 @router.get("/users", response_model=list[UserOut])
 def list_all_users(

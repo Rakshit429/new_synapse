@@ -5,6 +5,7 @@ from app.models.user import User
 from app.models.event import Event
 from app.models.auth_role import AuthRole
 from app.models.registration import Registration
+from app.models.enums import RoleName, OrgType
 from app.schemas.event import EventOut
 from app.schemas.user import TeamMemberCreate
 from app.core.config import settings
@@ -17,36 +18,57 @@ from datetime import datetime
 router = APIRouter()
 
 # ------------------------------------------------------------------
-# 🔐 ROLE DEPENDENCIES
+# 🔐 HIERARCHY DEFINITIONS
+# ------------------------------------------------------------------
+
+# Roles that manage others (The "Bosses")
+HEAD_ROLES_SET = {
+    "overall coordinator",
+    "president",
+    "vice president",
+    "general secretary",
+    "deputy general secretary",
+    "secretary",
+    "convener"
+}
+
+# ------------------------------------------------------------------
+# 🔐 DEPENDENCIES
 # ------------------------------------------------------------------
 
 def get_org_role_by_id(
     org_id: int,
     current_user: User = Depends(deps.get_current_user),
 ):
-    """Validates user has access to this specific Org Portal."""
+    """
+    Validates that the current user has ANY role in the specific org_id 
+    requested in the URL.
+    """
     auth = next((a for a in current_user.authorizations if a.id == org_id), None)
+    
     if not auth:
-        raise HTTPException(status_code=403, detail="You are not authorized to manage this organization.")
+        raise HTTPException(
+            status_code=403, 
+            detail="You are not authorized to manage this organization."
+        )
     return auth
 
-def get_overall_coordinator(
+def get_org_head(
     role: AuthRole = Depends(get_org_role_by_id)
 ):
     """
-    HIERARCHY ENFORCEMENT:
-    Only 'Overall Coordinator' can manage the team.
-    Coordinators and Executives cannot add/remove members.
+    Validates that the requester is a HEAD (e.g., President, OC).
     """
-    if role.role_name != "Overall Coordinator":
+    # ✅ FIX: role.role_name is now a String, so we compare directly
+    if role.role_name not in HEAD_ROLES_SET:
         raise HTTPException(
             status_code=403, 
-            detail="Permission Denied. Only the Overall Coordinator can manage the team."
+            detail="Permission Denied. Only Organization Heads can manage the team."
         )
     return role
 
 # ------------------------------------------------------------------
-# 📊 DASHBOARD ANALYTICS
+# 📊 DASHBOARD & ANALYTICS
 # ------------------------------------------------------------------
 
 @router.get("/{org_id}/dashboard")
@@ -55,9 +77,13 @@ def get_org_dashboard(
     db: Session = Depends(deps.get_db),
     role: AuthRole = Depends(get_org_role_by_id)
 ):
+    """Returns stats specific to the selected organization."""
+    # ✅ FIX: Removed .value (role.org_name is already a string)
     org_events = db.query(Event).filter(Event.org_name == role.org_name).all()
     
+    total_events = len(org_events)
     total_regs = sum(len(e.registrations) for e in org_events)
+    
     dept_counts = {}
     for event in org_events:
         for reg in event.registrations:
@@ -67,7 +93,7 @@ def get_org_dashboard(
     return {
         "org_name": role.org_name,
         "your_role": role.role_name,
-        "total_events": len(org_events),
+        "total_events": total_events,
         "total_registrations": total_regs,
         "dept_analytics": dept_counts 
     }
@@ -82,6 +108,7 @@ def get_org_events(
     db: Session = Depends(deps.get_db),
     role: AuthRole = Depends(get_org_role_by_id)
 ):
+    # ✅ FIX: Removed .value
     return db.query(Event).filter(Event.org_name == role.org_name).order_by(Event.date.desc()).all()
 
 @router.post("/{org_id}/events", response_model=EventOut)
@@ -93,17 +120,15 @@ def create_org_event(
     venue: str = Form(...),
     tags: str = Form("[]"), 
     custom_form_schema: str = Form("[]"),
-    
-    # JSON strings coming from Frontend
     target_audience: str = Form("{}"), 
     is_private: bool = Form(False),
-    
     photo: UploadFile = File(None),
     
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
     role: AuthRole = Depends(get_org_role_by_id)
 ):
+    # 1. Handle File Upload
     filename = None
     if photo:
         os.makedirs(settings.UPLOAD_FOLDER, exist_ok=True)
@@ -114,6 +139,7 @@ def create_org_event(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(photo.file, buffer)
 
+    # 2. Parse JSON fields
     try:
         tags_list = json.loads(tags)
         schema_list = json.loads(custom_form_schema)
@@ -122,6 +148,7 @@ def create_org_event(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid data format: {str(e)}")
 
+    # 3. Create Event
     event = Event(
         name=name,
         description=description,
@@ -132,8 +159,11 @@ def create_org_event(
         custom_form_schema=schema_list,
         target_audience=audience_dict,
         is_private=is_private,
+        
+        # ✅ FIX: Pass string directly
         org_name=role.org_name, 
         org_type=role.org_type,
+        
         event_manager_email=current_user.email
     )
     
@@ -143,7 +173,7 @@ def create_org_event(
     return event
 
 # ------------------------------------------------------------------
-# 📥 DATA EXPORTS & REGISTRATIONS (Restored)
+# 📥 DATA EXPORTS & REGISTRATIONS
 # ------------------------------------------------------------------
 
 @router.get("/{org_id}/events/{event_id}/registrations")
@@ -154,6 +184,7 @@ def get_event_registrations(
     role: AuthRole = Depends(get_org_role_by_id)
 ):
     """View list of students registered for a specific event."""
+    # ✅ FIX: Removed .value
     event = db.query(Event).filter(Event.id == event_id, Event.org_name == role.org_name).first()
     if not event:
         raise HTTPException(status_code=404, detail="Event not found or not owned by you")
@@ -177,6 +208,7 @@ def download_event_csv(
     role: AuthRole = Depends(get_org_role_by_id)
 ):
     """Download the attendee list as a CSV file."""
+    # ✅ FIX: Removed .value
     event = db.query(Event).filter(Event.id == event_id, Event.org_name == role.org_name).first()
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -197,6 +229,7 @@ def get_event_feedback(
     role: AuthRole = Depends(get_org_role_by_id)
 ):
     """Get average rating and stats."""
+    # ✅ FIX: Removed .value
     event = db.query(Event).filter(Event.id == event_id, Event.org_name == role.org_name).first()
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -213,7 +246,7 @@ def get_event_feedback(
     }
 
 # ------------------------------------------------------------------
-# 👥 TEAM MANAGEMENT
+# 👥 TEAM MANAGEMENT (Strictly Protected)
 # ------------------------------------------------------------------
 
 @router.get("/{org_id}/team", response_model=list[dict])
@@ -222,7 +255,8 @@ def get_team_members(
     db: Session = Depends(deps.get_db),
     role: AuthRole = Depends(get_org_role_by_id)
 ):
-    # Everyone in the org can VIEW the team
+    """View all team members."""
+    # ✅ FIX: Removed .value
     team_roles = db.query(AuthRole).filter(AuthRole.org_name == role.org_name).all()
     return [{
         "user_id": r.user_id, 
@@ -236,12 +270,24 @@ def add_team_member(
     org_id: int,
     member_in: TeamMemberCreate,
     db: Session = Depends(deps.get_db),
-    head_role: AuthRole = Depends(get_overall_coordinator) # 🔥 ONLY OC CAN ADD
+    head_role: AuthRole = Depends(get_org_head)
 ):
+    """
+    Appoint a new team member.
+    RESTRICTION: Heads cannot appoint other Heads (e.g., President).
+    """
+    # ✅ FIX 1: Use .value for comparison (Enum Object vs String Set)
+    if member_in.role.value in HEAD_ROLES_SET:
+        raise HTTPException(
+            status_code=403, 
+            detail="Permission Denied. You cannot appoint other Heads (President, OC, etc.). Contact Admin."
+        )
+
     target_user = db.query(User).filter(User.email == member_in.email).first()
     if not target_user:
         raise HTTPException(status_code=404, detail="User not found. They must login to Synapse at least once.")
 
+    # Check using string directly
     existing = db.query(AuthRole).filter(
         AuthRole.user_id == target_user.id,
         AuthRole.org_name == head_role.org_name
@@ -253,7 +299,8 @@ def add_team_member(
     new_role = AuthRole(
         user_id=target_user.id,
         org_name=head_role.org_name,
-        role_name=member_in.role, # 'Coordinator' or 'Executive'
+        # ✅ FIX 2: Extract the string value for the database
+        role_name=member_in.role.value, 
         org_type=head_role.org_type
     )
     db.add(new_role)
@@ -265,18 +312,28 @@ def remove_team_member(
     org_id: int,
     user_id: int,
     db: Session = Depends(deps.get_db),
-    head_role: AuthRole = Depends(get_overall_coordinator) # 🔥 ONLY OC CAN REMOVE
+    head_role: AuthRole = Depends(get_org_head)
 ):
     if user_id == head_role.user_id:
         raise HTTPException(status_code=400, detail="Cannot remove yourself")
 
+    # ✅ FIX: Use string directly
     role_to_delete = db.query(AuthRole).filter(
         AuthRole.user_id == user_id,
         AuthRole.org_name == head_role.org_name
     ).first()
     
-    if role_to_delete:
-        db.delete(role_to_delete)
-        db.commit()
+    if not role_to_delete:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+    # ✅ FIX: Check against set of strings
+    if role_to_delete.role_name in HEAD_ROLES_SET:
+        raise HTTPException(
+            status_code=403, 
+            detail="Permission Denied. You cannot remove another Head-level member."
+        )
+    
+    db.delete(role_to_delete)
+    db.commit()
     
     return {"msg": "Member removed"}

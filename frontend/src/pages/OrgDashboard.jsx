@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/axios';
 import { Calendar, Users, BarChart3, Plus, Download, Eye, Lock, Globe, Trash2, UserPlus, X } from 'lucide-react';
@@ -7,8 +7,7 @@ import DemographicsChart from '../components/Charts/DemographicsChart';
 import Loader from '../components/UI/Loader';
 import toast from 'react-hot-toast';
 
-// Import Constants
-import { DEPARTMENTS, HOSTELS, YEARS } from '../utils/constants';
+import { DEPARTMENTS, HOSTELS, YEARS, HEAD_ROLES, TEAM_ROLES } from '../utils/constants';
 
 // --- HELPER COMPONENT: MultiSelect ---
 const MultiSelect = ({ label, options, selected, onChange, placeholder }) => {
@@ -17,7 +16,6 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }) => {
     if (value && !selected.includes(value)) {
       onChange([...selected, value]);
     }
-    // Reset select to default
     e.target.value = ""; 
   };
 
@@ -41,7 +39,6 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }) => {
         ))}
       </select>
       
-      {/* Selected Chips */}
       <div className="d-flex flex-wrap gap-2">
         {selected.length > 0 ? (
           selected.map(item => (
@@ -71,11 +68,10 @@ const OrgDashboard = () => {
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Create Event State
   const [newEvent, setNewEvent] = useState({ 
     name: '', date: '', venue: '', description: '', tags: '', isPrivate: false 
   });
-  // 🔥 Targeting Arrays
+
   const [targetDepts, setTargetDepts] = useState([]);
   const [targetHostels, setTargetHostels] = useState([]);
   const [targetYears, setTargetYears] = useState([]);
@@ -83,14 +79,10 @@ const OrgDashboard = () => {
   const [formSchema, setFormSchema] = useState([]);
   const [imageFile, setImageFile] = useState(null);
 
-  // Add Member State
-  const [newMember, setNewMember] = useState({ email: '', role: 'Coordinator' });
+  const [newMember, setNewMember] = useState({ email: '', role: 'coordinator' });
 
-  useEffect(() => {
-    fetchData();
-  }, [orgId]);
-
-  const fetchData = async () => {
+  // ✅ FIXED: Wrapped in useCallback to satisfy linter
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [dashRes, eventsRes, teamRes] = await Promise.all([
@@ -107,15 +99,16 @@ const OrgDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orgId]);
 
-  // --- ACTIONS ---
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]); // ✅ Dependency Added
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     
-    // Standard fields
     formData.append('name', newEvent.name);
     formData.append('date', newEvent.date);
     formData.append('venue', newEvent.venue);
@@ -125,11 +118,10 @@ const OrgDashboard = () => {
     formData.append('is_private', newEvent.isPrivate);
     if (imageFile) formData.append('photo', imageFile);
     
-    // 🔥 Construct Target Audience JSON from Arrays
     const audience = {
       depts: targetDepts,
       hostels: targetHostels,
-      years: targetYears.map(y => parseInt(y)) // Ensure years are ints
+      years: targetYears.map(y => parseInt(y))
     };
     formData.append('target_audience', JSON.stringify(audience));
 
@@ -137,7 +129,6 @@ const OrgDashboard = () => {
       await api.post(`/org/${orgId}/events`, formData);
       toast.success("Event Created Successfully!");
       
-      // Reset Form
       setNewEvent({ name: '', date: '', venue: '', description: '', tags: '', isPrivate: false });
       setTargetDepts([]); setTargetHostels([]); setTargetYears([]);
       setFormSchema([]);
@@ -153,8 +144,8 @@ const OrgDashboard = () => {
     try {
       await api.post(`/org/${orgId}/team`, newMember);
       toast.success(`${newMember.role} added successfully`);
-      setNewMember({ email: '', role: 'Coordinator' });
-      fetchData(); // Refresh list
+      setNewMember({ email: '', role: 'coordinator' });
+      fetchData(); 
     } catch (err) {
       toast.error(err.response?.data?.detail || "Failed to add member");
     }
@@ -172,13 +163,12 @@ const OrgDashboard = () => {
   };
 
   if (loading) return <Loader />;
-  {console.log(stats);}
-  // Permission Check for Team Management
-  const isOverallCoordinator = stats?.your_role === "club_head";
+
+  // Permission Check
+  const isHead = stats?.your_role && HEAD_ROLES.includes(stats.your_role.toLowerCase());
 
   return (
     <div className="container-fluid">
-      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="text-white fw-bold">{stats?.org_name} Dashboard</h2>
@@ -202,7 +192,6 @@ const OrgDashboard = () => {
         </div>
       </div>
 
-      {/* 1. OVERVIEW TAB */}
       {activeTab === 'dashboard' && (
         <div className="row g-4">
           <div className="col-md-6">
@@ -234,7 +223,6 @@ const OrgDashboard = () => {
         </div>
       )}
 
-      {/* 2. EVENTS TAB */}
       {activeTab === 'events' && (
         <div className="glass-card p-4">
           <h5 className="text-white mb-4">Your Events</h5>
@@ -255,7 +243,6 @@ const OrgDashboard = () => {
                     <td>{new Date(ev.date).toLocaleDateString()}</td>
                     <td>{ev.is_private ? <span className="badge bg-secondary"><Lock size={12}/> Private</span> : <span className="badge bg-success"><Globe size={12}/> Public</span>}</td>
                     <td>
-                      {/* You can add a CSV download call here */}
                       <button className="btn btn-sm btn-outline-success">
                          <Download size={14} /> CSV
                       </button>
@@ -268,11 +255,9 @@ const OrgDashboard = () => {
         </div>
       )}
 
-      {/* 3. TEAM TAB (NEW) */}
       {activeTab === 'team' && (
         <div className="row g-4">
-          {/* Add Member Form (Only for Overall Coordinator) */}
-          {isOverallCoordinator && (
+          {isHead && (
             <div className="col-md-4">
               <div className="glass-card p-4 h-100">
                 <h5 className="text-white mb-3"><UserPlus size={18}/> Add Member</h5>
@@ -295,8 +280,10 @@ const OrgDashboard = () => {
                       value={newMember.role}
                       onChange={e => setNewMember({...newMember, role: e.target.value})}
                     >
-                      <option value="Coordinator">Coordinator</option>
-                      <option value="Executive">Executive</option>
+                      {/* ✅ FIXED: Now using TEAM_ROLES constant */}
+                      {TEAM_ROLES.map(role => (
+                        <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>
+                      ))}
                     </select>
                   </div>
                   <button type="submit" className="btn btn-purple w-100">Add to Team</button>
@@ -305,8 +292,7 @@ const OrgDashboard = () => {
             </div>
           )}
 
-          {/* Team List */}
-          <div className={isOverallCoordinator ? "col-md-8" : "col-12"}>
+          <div className={isHead ? "col-md-8" : "col-12"}>
             <div className="glass-card p-4">
               <h5 className="text-white mb-4">Team Members</h5>
               <div className="table-responsive">
@@ -316,7 +302,7 @@ const OrgDashboard = () => {
                       <th>Name</th>
                       <th>Email</th>
                       <th>Role</th>
-                      {isOverallCoordinator && <th>Action</th>}
+                      {isHead && <th>Action</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -325,13 +311,13 @@ const OrgDashboard = () => {
                         <td>{member.name}</td>
                         <td>{member.email}</td>
                         <td>
-                          <span className={`badge ${member.role === 'Overall Coordinator' ? 'bg-danger' : member.role === 'Coordinator' ? 'bg-warning text-dark' : 'bg-info text-dark'}`}>
+                          <span className={`badge ${HEAD_ROLES.includes(member.role) ? 'bg-danger' : 'bg-info text-dark'}`}>
                             {member.role}
                           </span>
                         </td>
-                        {isOverallCoordinator && (
+                        {isHead && (
                           <td>
-                            {member.role !== 'Overall Coordinator' && (
+                            {!HEAD_ROLES.includes(member.role.toLowerCase()) && (
                               <button 
                                 className="btn btn-sm btn-outline-danger" 
                                 onClick={() => handleRemoveMember(member.user_id)}
@@ -351,12 +337,18 @@ const OrgDashboard = () => {
         </div>
       )}
 
-      {/* 4. CREATE EVENT TAB (Updated with Multi-Select) */}
       {activeTab === 'create' && (
         <div className="glass-card p-4 rounded-4 mx-auto" style={{ maxWidth: '800px' }}>
           <h4 className="text-white fw-bold mb-4">Create New Event</h4>
           <form onSubmit={handleCreateEvent}>
-            <div className="row g-3">
+             {/* ... (Event form fields omitted for brevity, logic is same) ... */}
+             {/* You can copy the form fields from the previous file or ask me if you need the full form block again */}
+             
+             {/* Simplified Check - Full Form Logic handled above in handleCreateEvent */}
+             <p className="text-muted small">Event Form Fields loaded...</p>
+             
+             {/* Just ensure MultiSelect and inputs use the state variables defined at top */}
+              <div className="row g-3">
               <div className="col-12">
                 <label className="text-secondary small">Event Name</label>
                 <input type="text" className="form-control bg-dark text-white border-secondary" required 
@@ -378,7 +370,6 @@ const OrgDashboard = () => {
                   value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} />
               </div>
               
-              {/* 🔥 UPDATED TARGETING SECTION 🔥 */}
               <div className="col-12 border-top border-secondary pt-3 mt-3">
                 <h6 className="text-white mb-3">Audience Targeting</h6>
               </div>
@@ -406,7 +397,7 @@ const OrgDashboard = () => {
               <div className="col-md-6">
                 <MultiSelect 
                   label="Target Years"
-                  options={YEARS.map(String)} // Convert numbers to string for select
+                  options={YEARS.map(String)} 
                   selected={targetYears}
                   onChange={setTargetYears}
                   placeholder="Select years..."
@@ -421,7 +412,6 @@ const OrgDashboard = () => {
                 </div>
               </div>
 
-              {/* MEDIA */}
               <div className="col-12 border-top border-secondary pt-3 mt-3">
                 <h6 className="text-white mb-3">Media & Metadata</h6>
               </div>
